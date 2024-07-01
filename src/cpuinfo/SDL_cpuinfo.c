@@ -21,6 +21,8 @@
 
 #include "SDL_internal.h"
 
+#include "SDL_cpuinfo_c.h"
+
 #if defined(SDL_PLATFORM_WIN32) || defined(SDL_PLATFORM_WINRT) || defined(SDL_PLATFORM_GDK)
 #include "../core/windows/SDL_windows.h"
 #endif
@@ -1156,7 +1158,7 @@ int SDL_GetSystemRAM(void)
     return SDL_SystemRAM;
 }
 
-size_t SDL_SIMDGetAlignment(void)
+size_t SDL_GetSIMDAlignment(void)
 {
     if (SDL_SIMDAlignment == 0xFFFFFFFF) {
         SDL_GetCPUFeatures(); /* make sure this has been calculated */

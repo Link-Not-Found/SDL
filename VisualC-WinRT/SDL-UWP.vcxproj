@@ -74,7 +74,6 @@
     <ClInclude Include="..\include\SDL3\SDL_platform_defines.h" />
     <ClInclude Include="..\include\SDL3\SDL_power.h" />
     <ClInclude Include="..\include\SDL3\SDL_properties.h" />
-    <ClInclude Include="..\include\SDL3\SDL_quit.h" />
     <ClInclude Include="..\include\SDL3\SDL_rect.h" />
     <ClInclude Include="..\include\SDL3\SDL_render.h" />
     <ClInclude Include="..\include\SDL3\SDL_revision.h" />
@@ -120,10 +119,11 @@
     <ClInclude Include="..\src\events\SDL_dropevents_c.h" />
     <ClInclude Include="..\src\events\SDL_events_c.h" />
     <ClInclude Include="..\src\events\SDL_keyboard_c.h" />
+    <ClInclude Include="..\src\events\SDL_keymap_c.h" />
     <ClInclude Include="..\src\events\SDL_mouse_c.h" />
     <ClInclude Include="..\src\events\SDL_touch_c.h" />
     <ClInclude Include="..\src\events\SDL_windowevents_c.h" />
-    <ClInclude Include="..\src\filesystem\SDL_filesystem.h" />
+    <ClInclude Include="..\src\filesystem\SDL_sysfilesystem.h" />
     <ClInclude Include="..\src\haptic\SDL_haptic_c.h" />
     <ClInclude Include="..\src\haptic\SDL_syshaptic.h" />
     <ClInclude Include="..\src\haptic\windows\SDL_dinputhaptic_c.h" />
@@ -315,11 +315,13 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\src\dialog\SDL_dialog_utils.c" />
     <ClCompile Include="..\src\events\SDL_clipboardevents.c" />
     <ClCompile Include="..\src\events\SDL_displayevents.c" />
     <ClCompile Include="..\src\events\SDL_dropevents.c" />
     <ClCompile Include="..\src\events\SDL_events.c" />
     <ClCompile Include="..\src\events\SDL_keyboard.c" />
+    <ClCompile Include="..\src\events\SDL_keymap.c" />
     <ClCompile Include="..\src\events\SDL_mouse.c" />
     <ClCompile Include="..\src\events\SDL_pen.c" />
     <ClCompile Include="..\src\events\SDL_quit.c" />
@@ -442,6 +444,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </MASM>
     <ClCompile Include="..\src\stdlib\SDL_qsort.c" />
+    <ClCompile Include="..\src\stdlib\SDL_random.c" />
     <ClCompile Include="..\src\stdlib\SDL_stdlib.c" />
     <ClCompile Include="..\src\stdlib\SDL_string.c" />
     <ClCompile Include="..\src\stdlib\SDL_strtokr.c" />

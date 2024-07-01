@@ -36,7 +36,6 @@
 #define HAVE_GCC_ATOMICS    1
 
 #define HAVE_ALLOCA_H 1
-#define HAVE_CTYPE_H 1
 #define HAVE_FLOAT_H 1
 #define HAVE_INTTYPES_H 1
 #define HAVE_LIMITS_H 1
@@ -85,8 +84,6 @@
 #define HAVE_ATOF 1
 #define HAVE_STRCMP 1
 #define HAVE_STRNCMP    1
-#define HAVE_STRCASECMP 1
-#define HAVE_STRNCASECMP 1
 #define HAVE_STRCASESTR 1
 #define HAVE_VSSCANF 1
 #define HAVE_VSNPRINTF  1
@@ -112,6 +109,10 @@
 #define HAVE_FLOORF 1
 #define HAVE_FMOD   1
 #define HAVE_FMODF  1
+#define HAVE_ISINF  1
+#define HAVE_ISINF_FLOAT_MACRO 1
+#define HAVE_ISNAN  1
+#define HAVE_ISNAN_FLOAT_MACRO 1
 #define HAVE_LOG    1
 #define HAVE_LOGF   1
 #define HAVE_LOG10  1
@@ -143,19 +144,26 @@
 #define HAVE_CLOCK_GETTIME  1
 
 /* Enable various audio drivers */
+#ifndef SDL_AUDIO_DISABLED
 #define SDL_AUDIO_DRIVER_ANDROID    1
 #define SDL_AUDIO_DRIVER_OPENSLES   1
 #define SDL_AUDIO_DRIVER_AAUDIO     1
-#define SDL_AUDIO_DRIVER_DUMMY  1
+#endif /* SDL_AUDIO_DISABLED */
 
 /* Enable various input drivers */
+#ifndef SDL_JOYSTICK_DISABLED
 #define SDL_JOYSTICK_ANDROID    1
 #define SDL_JOYSTICK_HIDAPI     1
 #define SDL_JOYSTICK_VIRTUAL    1
+#endif /* SDL_JOYSTICK_DISABLED */
+#ifndef SDL_HAPTIC_DISABLED
 #define SDL_HAPTIC_ANDROID  1
+#endif /* SDL_HAPTIC_DISABLED */
 
 /* Enable sensor driver */
+#ifndef SDL_SENSOR_DISABLED
 #define SDL_SENSOR_ANDROID  1
+#endif /* SDL_SENSOR_DISABLED */
 
 /* Enable various shared object loading systems */
 #define SDL_LOADSO_DLOPEN   1
@@ -195,8 +203,9 @@
 #define SDL_FSOPS_POSIX 1
 
 /* Enable the camera driver */
+#ifndef SDL_CAMERA_DISABLED
 #define SDL_CAMERA_DRIVER_ANDROID 1
-#define SDL_CAMERA_DRIVER_DUMMY 1
+#endif /* SDL_CAMERA_DISABLED */
 
 /* Enable nl_langinfo and high-res file times on version 26 and higher. */
 #if __ANDROID_API__ >= 26

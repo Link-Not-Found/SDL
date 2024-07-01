@@ -33,7 +33,6 @@ extern "C" {
 
 struct SDL_JoystickDriver;
 struct SDL_SteamVirtualGamepadInfo;
-extern char SDL_joystick_magic;
 
 /* Initialization and shutdown functions */
 extern int SDL_InitJoysticks(void);
@@ -157,6 +156,7 @@ extern SDL_bool SDL_ShouldIgnoreJoystick(const char *name, SDL_JoystickGUID guid
 /* Internal event queueing functions */
 extern void SDL_PrivateJoystickAddTouchpad(SDL_Joystick *joystick, int nfingers);
 extern void SDL_PrivateJoystickAddSensor(SDL_Joystick *joystick, SDL_SensorType type, float rate);
+extern void SDL_PrivateJoystickSensorRate(SDL_Joystick *joystick, SDL_SensorType type, float rate);
 extern void SDL_PrivateJoystickAdded(SDL_JoystickID instance_id);
 extern SDL_bool SDL_IsJoystickBeingAdded(void);
 extern void SDL_PrivateJoystickRemoved(SDL_JoystickID instance_id);
@@ -167,7 +167,7 @@ extern int SDL_SendJoystickHat(Uint64 timestamp, SDL_Joystick *joystick, Uint8 h
 extern int SDL_SendJoystickButton(Uint64 timestamp, SDL_Joystick *joystick, Uint8 button, Uint8 state);
 extern int SDL_SendJoystickTouchpad(Uint64 timestamp, SDL_Joystick *joystick, int touchpad, int finger, Uint8 state, float x, float y, float pressure);
 extern int SDL_SendJoystickSensor(Uint64 timestamp, SDL_Joystick *joystick, SDL_SensorType type, Uint64 sensor_timestamp, const float *data, int num_values);
-extern void SDL_SendJoystickBatteryLevel(SDL_Joystick *joystick, SDL_JoystickPowerLevel ePowerLevel);
+extern void SDL_SendJoystickPowerInfo(SDL_Joystick *joystick, SDL_PowerState state, int percent);
 
 /* Function to get the Steam virtual gamepad info for a joystick */
 extern const struct SDL_SteamVirtualGamepadInfo *SDL_GetJoystickInstanceVirtualGamepadInfo(SDL_JoystickID instance_id);

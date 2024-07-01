@@ -38,6 +38,17 @@ target_link_libraries(sdltests_utils PRIVATE SDL3::Headers)
 
 file(GLOB RESOURCE_FILES *.bmp *.wav *.hex moose.dat utf8.txt)
 
+if(WIN32 AND NOT WINDOWS_STORE)
+    option(SDLTEST_PROCDUMP "Run tests using sdlprocdump for minidump generation" OFF)
+    add_executable(sdlprocdump win32/sdlprocdump.c)
+    SDL_AddCommonCompilerFlags(sdlprocdump)
+    if(SDLTEST_PROCDUMP)
+        set(CMAKE_TEST_LAUNCHER "$<TARGET_FILE:sdlprocdump>")
+    else()
+        set_property(TARGET sdlprocdump PROPERTY EXCLUDE_FROM_ALL "1")
+    endif()
+endif()
+
 if(CMAKE_RUNTIME_OUTPUT_DIRECTORY)
     set(test_bin_dir "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
     if(NOT IS_ABSOLUTE "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
@@ -131,6 +142,7 @@ macro(add_sdl_test_executable TARGET)
         add_executable(${TARGET} ${AST_SOURCES} ${EXTRA_SOURCES})
     endif()
     SDL_AddCommonCompilerFlags(${TARGET})
+    target_include_directories(${TARGET} PRIVATE "${SDL3_SOURCE_DIR}/src/video/khronos")
     target_link_libraries(${TARGET} PRIVATE SDL3::SDL3_test SDL3::${sdl_name_component})
     if(NOT AST_NO_C90 AND NOT SDL_CMAKE_PLATFORM MATCHES "^(n3ds|ps2|psp)$")
         set_property(TARGET ${TARGET} PROPERTY C_STANDARD 90)
@@ -247,14 +259,13 @@ if(FFmpeg_FOUND AND LIBAVUTIL_AVFRAME_HAS_CH_LAYOUT)
         target_link_libraries(testffmpeg PRIVATE OpenGL::EGL)
         target_compile_definitions(testffmpeg PRIVATE HAVE_EGL)
     endif()
-    target_include_directories(testffmpeg BEFORE PRIVATE ${SDL3_SOURCE_DIR}/src/video/khronos)
+    target_include_directories(testffmpeg SYSTEM BEFORE PRIVATE ${SDL3_SOURCE_DIR}/src/video/khronos)
     target_link_libraries(testffmpeg PRIVATE ${FFMPEG_LIBRARIES})
 else()
     message(STATUS "Can't find ffmpeg 5.1.3 or newer, skipping testffmpeg")
 endif()
 
 add_sdl_test_executable(checkkeys SOURCES checkkeys.c)
-add_sdl_test_executable(checkkeysthreads SOURCES checkkeysthreads.c)
 add_sdl_test_executable(loopwave NEEDS_RESOURCES TESTUTILS MAIN_CALLBACKS SOURCES loopwave.c)
 add_sdl_test_executable(testsurround SOURCES testsurround.c)
 add_sdl_test_executable(testresample NEEDS_RESOURCES SOURCES testresample.c)
@@ -265,35 +276,27 @@ file(GLOB TESTAUTOMATION_SOURCE_FILES testautomation*.c)
 add_sdl_test_executable(testautomation NONINTERACTIVE NONINTERACTIVE_TIMEOUT 120 NEEDS_RESOURCES NO_C90 SOURCES ${TESTAUTOMATION_SOURCE_FILES})
 add_sdl_test_executable(testmultiaudio NEEDS_RESOURCES TESTUTILS SOURCES testmultiaudio.c)
 add_sdl_test_executable(testaudiohotplug NEEDS_RESOURCES TESTUTILS SOURCES testaudiohotplug.c)
-add_sdl_test_executable(testaudiocapture MAIN_CALLBACKS SOURCES testaudiocapture.c)
+add_sdl_test_executable(testaudiorecording MAIN_CALLBACKS SOURCES testaudiorecording.c)
 add_sdl_test_executable(testatomic NONINTERACTIVE SOURCES testatomic.c)
 add_sdl_test_executable(testintersections SOURCES testintersections.c)
 add_sdl_test_executable(testrelative SOURCES testrelative.c)
 add_sdl_test_executable(testhittesting SOURCES testhittesting.c)
 add_sdl_test_executable(testdraw SOURCES testdraw.c)
 add_sdl_test_executable(testdrawchessboard SOURCES testdrawchessboard.c)
-add_sdl_test_executable(testdropfile SOURCES testdropfile.c)
+add_sdl_test_executable(testdropfile MAIN_CALLBACKS SOURCES testdropfile.c)
 add_sdl_test_executable(testerror NONINTERACTIVE SOURCES testerror.c)
 
 set(build_options_dependent_tests )
 
 add_sdl_test_executable(testevdev BUILD_DEPENDENT NONINTERACTIVE SOURCES testevdev.c)
 
-if(APPLE)
+if(MACOS)
     add_sdl_test_executable(testnative BUILD_DEPENDENT NEEDS_RESOURCES TESTUTILS
         SOURCES
             testnative.c
             testnativecocoa.m
             testnativex11.c
     )
-
-    cmake_push_check_state()
-    check_c_compiler_flag(-Wno-error=deprecated-declarations HAVE_WNO_ERROR_DEPRECATED_DECLARATIONS)
-    cmake_pop_check_state()
-    target_link_libraries(testnative PRIVATE "-Wl,-framework,Cocoa")
-    if(HAVE_WNO_ERROR_DEPRECATED_DECLARATIONS)
-        set_property(SOURCE "testnativecocoa.m" APPEND_STRING PROPERTY COMPILE_FLAGS " -Wno-error=deprecated-declarations")
-    endif()
 elseif(WINDOWS)
     add_sdl_test_executable(testnative BUILD_DEPENDENT NEEDS_RESOURCES TESTUTILS SOURCES testnative.c testnativew32.c)
 elseif(HAVE_X11 OR HAVE_WAYLAND)
@@ -340,11 +343,7 @@ files2headers(gamepad_image_headers
     gamepad_axis_arrow.bmp
     gamepad_axis.bmp
     gamepad_back.bmp
-    gamepad_battery_empty.bmp
-    gamepad_battery_full.bmp
-    gamepad_battery_low.bmp
-    gamepad_battery_medium.bmp
-    gamepad_battery_unknown.bmp
+    gamepad_battery.bmp
     gamepad_battery_wired.bmp
     gamepad_button_background.bmp
     gamepad_button.bmp
@@ -367,6 +366,9 @@ add_sdl_test_executable(testgl SOURCES testgl.c)
 add_sdl_test_executable(testgles SOURCES testgles.c)
 if(ANDROID)
     target_link_libraries(testgles PRIVATE GLESv1_CM)
+elseif(IOS OR TVOS)
+    find_library(GLES_LIB OpenGLES REQUIRED)
+    target_link_libraries(testgles PRIVATE "${GLES_LIB}")
 endif()
 check_include_file("GLES2/gl2platform.h" HAVE_GLES2_GL2PLATFORM_H)
 if(HAVE_GLES2_GL2PLATFORM_H OR (TARGET SDL3-static OR SDL3-shared))
@@ -423,6 +425,7 @@ add_sdl_test_executable(testpopup SOURCES testpopup.c)
 add_sdl_test_executable(testdialog SOURCES testdialog.c)
 add_sdl_test_executable(testtime SOURCES testtime.c)
 add_sdl_test_executable(testmanymouse SOURCES testmanymouse.c)
+add_sdl_test_executable(testmodal SOURCES testmodal.c)
 
 if (HAVE_WAYLAND)
     # Set the GENERATED property on the protocol file, since it is first created at build time
@@ -486,6 +489,19 @@ if(EMSCRIPTEN)
             COMMAND Python3::Interpreter "${CMAKE_CURRENT_SOURCE_DIR}/emscripten/server.py" -d "${CMAKE_CURRENT_BINARY_DIR}")
     endif()
 endif()
+if(MACOS)
+    target_link_options(testnative PRIVATE "-Wl,-framework,Cocoa")
+endif()
+if(APPLE)
+    cmake_push_check_state()
+    check_c_compiler_flag(-Wno-error=deprecated-declarations HAVE_WNO_ERROR_DEPRECATED_DECLARATIONS)
+    cmake_pop_check_state()
+    if(HAVE_WNO_ERROR_DEPRECATED_DECLARATIONS)
+        set_property(SOURCE "testnativecocoa.m" APPEND PROPERTY COMPILE_OPTIONS "-Wno-error=deprecated-declarations")
+        set_property(TARGET testgles APPEND PROPERTY COMPILE_OPTIONS "-Wno-error=deprecated-declarations")
+    endif()
+endif()
+
 
 if(PSP)
     # Build EBOOT files if building for PSP
@@ -624,10 +640,11 @@ foreach(TARGET ${SDL_TEST_EXECUTABLES})
 endforeach()
 
 add_sdl_test(testautomation-no-simd testautomation)
-set_property(TEST testautomation-no-simd APPEND PROPERTY ENVIRONMENT "SDL_CPU_FEATURE_MASK=-all")
-
 add_sdl_test(testplatform-no-simd testplatform)
-set_property(TEST testplatform-no-simd APPEND PROPERTY ENVIRONMENT "SDL_CPU_FEATURE_MASK=-all")
+set_property(TEST testautomation-no-simd testplatform-no-simd APPEND PROPERTY ENVIRONMENT "SDL_CPU_FEATURE_MASK=-all")
+
+# testautomation creates temporary files which might conflict
+set_property(TEST testautomation-no-simd testautomation PROPERTY RUN_SERIAL TRUE)
 
 if(SDL_INSTALL_TESTS)
     if(RISCOS)
